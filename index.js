@@ -7,12 +7,18 @@ const stopTime = game.querySelector("[data-stop-time]");
 const timerStopTime = game.querySelector("[data-stop-time-p]");
 const question = game.querySelector("[data-question]");
 const cereLitera = game.querySelector("[data-cere-litera]");
+const price = game.querySelector("[data-price]");
 
 let totalTime;
 let stopGameTime;
 let counterStopTime;
 let dataset;
 let index = 0;
+let word = [];
+let priceLetter;
+let randomLetter = [];
+let total;
+let stopT;
 
 startGame.addEventListener("click", startGameFn);
 stopTime.addEventListener("click", stopTimeFn);
@@ -24,13 +30,39 @@ cereLitera.addEventListener("click", cereLiteraFn);
 function cereLiteraFn(){
     const corectAnwer = q[index].answer;
     const anwerArr = corectAnwer.split("")
-    const randomNumber = Math.floor(Math.random()* corectAnwer.length);
+    const datasetInput = game.querySelectorAll("[data-id]");
+    
+    let randomNumber = Math.floor(Math.random()* corectAnwer.length);
+
+    if(randomLetter.includes(randomNumber)){
+        randomNumber = Math.floor(Math.random()* corectAnwer.length)
+    }else{
+        randomLetter.push(randomNumber)
+    }
+
+    priceLetter = priceLetter - 100;
+    price.innerText = priceLetter;
+
+    datasetInput.forEach(item => {
+        item.dataset.id == randomNumber ? item.value = anwerArr[randomNumber] : "";
+    })
+
     dataset = randomNumber;
+    word[randomNumber] = anwerArr[randomNumber];
+
+    const checkArray = word.every(item => {
+        return item !== "";
+    })
+    if(checkArray){
+        submit()
+    }
 }
 
 function startGameFn(){
     totalTime = 180;
     stopGameTime = false;
+    total = 0;
+    stopT = false;
     startGame.classList.add("hide");
     game.classList.remove("hide");
     getData()
@@ -41,7 +73,9 @@ setInterval(getData, 1000);
 
 
 function counterTimeStop(){
-    if(counterStopTime === 0) return;
+    if(counterStopTime === 0){
+       return nextQuestion();
+    };
     counterStopTime--;
 
     const p = document.querySelector("[data-item]")
@@ -54,7 +88,10 @@ function counterTimeStop(){
 
 function getData(){
     if(stopGameTime) return
-    if(totalTime === 0) return;
+    if(totalTime === 0){
+        return nextQuestion()
+    };
+
     totalTime--;
 
     const dataTime = new Date(1000*totalTime);
@@ -66,6 +103,7 @@ function getData(){
 
 
 function stopTimeFn(){
+    stopT = true;
     stopTime.classList.add("hide");
     cereLitera.classList.add("hide");
     stopGameTime = true;
@@ -75,48 +113,84 @@ function stopTimeFn(){
     timerStopTime.appendChild(p);
     counterTimeStop()
     setInterval(counterTimeStop, 1000);
+
+    const inputTime = game.querySelectorAll("[data-id]");
+    inputTime.forEach(item => {
+        item.style.setProperty("--type", "auto");
+    })
+    inputTime[0].focus();
 }
 
 function questionFn(){
     const ques = question.querySelector("h1");
     const answer = q[index].answer;
-    ques.innerText = q[index].question;
     const inputConatainer = document.createElement("div");
+    priceLetter = q[index].price;
+
+    ques.innerText = q[index].question;
+    price.innerText = q[index].price;
+
+
 
     for(let i = 0; i < answer.length; i++){
         const input = document.createElement("input");
         input.classList.add("input_key")
         inputConatainer.append(input);
         input.dataset.id = i;
+        input.style.setProperty("--type", "none");
+        input.classList.add("input");
         input.maxLength = "1";
         input.addEventListener("keyup", enterKey)
+        
+        word[i] = "";
     }
     question.appendChild(inputConatainer)
 }
 
 
-let word = [];
+
 
 function enterKey(e){
-    const value = e.key;
+    if(!stopT) return
+    const value = e.key.toUpperCase();
     const target = e.target;
+    const dataset = target.dataset.id;
     const next = target.nextElementSibling;
     const prev = target.previousElementSibling;
 
+    const key = ["BACKSPACE", "ARROWLEFT", "ARROWRIGHT"];
 
-    if(value.length > 0){
+    if(value.length > 0 || e.key === "ArrowRight"){
+
+
+        !key.includes(value) && (word[dataset] = value);
          if(next){
-             word.push(value)
              next.focus()
         }else{
             submit()
         }
-
-    if(value === "Backspace"){
-        if(prev) prev.focus();
-        word.pop()
     }
+
+
+    console.log(word)
+
+    if(e.key === "Backspace"){
+        if(prev) prev.focus();
+        word[dataset] = "";
+    }
+
+    if(e.key === "ArrowLeft" && prev){
+        prev.focus();
+    }
+
+const checkArray = word.every(item => {
+    return item !== "";
+})
+
+if(checkArray){
+    submit()
 }
+
 }
 
 
@@ -126,44 +200,38 @@ function submit(){
 
     if(dataWord === q[index].answer){
         stopGameTime = true;
-        console.log("corest")
+        winLetter();
 
     }else{
+        const itemValue = game.querySelectorAll("[data-id]");
+        itemValue.forEach((item, i) => {
+            item.value = "";
+            word[i] = ""
+        })
+
+        itemValue[0].focus()
+        
     }
 }
 
 
 
+function nextQuestion(){
+    stopT = false;
+}
 
 
 
+function winLetter(){
+    index++;
+    totalTime = 180;
+    stopGameTime = false;
+    total = 0;
+    stopT = false;
+    startGame.classList.add("hide");
+    game.classList.remove("hide");
+    getData()
+    questionFn()
 
-
-
-
-
-
-
-
-
-// function showCountdown(countSeconds){  
-//    var countStatus = new Date(1000 * countSeconds).toISOString().substr(11, 8);
-//    document.getElementById('output').innerHTML = "Count: " + countStatus;
-
-//    const data = new Date(1000*179);
-//    //console.log(data)
-//    console.log(data.getSeconds(), data.getMinutes())
-
-// }
-// var count = 180;
-
-// function countdown() {
-//   if (count === 0) return;
-
-//   count--;
-//   setTimeout(countdown, 1000);
-//   showCountdown(count);
-  
-// };
-
-// countdown();
+    console.log("win")
+}
