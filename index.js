@@ -8,6 +8,7 @@ const timerStopTime = game.querySelector("[data-stop-time-p]");
 const question = game.querySelector("[data-question]");
 const cereLitera = game.querySelector("[data-cere-litera]");
 const price = game.querySelector("[data-price]");
+const totalPrice = game.querySelector("[data-total-price]");
 
 let totalTime;
 let stopGameTime;
@@ -76,9 +77,10 @@ function counterTimeStop(){
     if(counterStopTime === 0){
        return nextQuestion();
     };
+
     counterStopTime--;
 
-    const p = document.querySelector("[data-item]")
+    const p = document.querySelector("[data-item]");
     const dataTime = new Date(1000*counterStopTime);
     const seconds = dataTime.getSeconds();
     p.innerHTML = `${seconds}`;
@@ -89,7 +91,7 @@ function counterTimeStop(){
 function getData(){
     if(stopGameTime) return
     if(totalTime === 0){
-        return nextQuestion()
+        return nextQuestion();
     };
 
     totalTime--;
@@ -125,6 +127,7 @@ function questionFn(){
     const ques = question.querySelector("h1");
     const answer = q[index].answer;
     const inputConatainer = document.createElement("div");
+    inputConatainer.dataset.input = true;
     priceLetter = q[index].price;
 
     ques.innerText = q[index].question;
@@ -141,7 +144,6 @@ function questionFn(){
         input.classList.add("input");
         input.maxLength = "1";
         input.addEventListener("keyup", enterKey)
-        
         word[i] = "";
     }
     question.appendChild(inputConatainer)
@@ -170,9 +172,6 @@ function enterKey(e){
             submit()
         }
     }
-
-
-    console.log(word)
 
     if(e.key === "Backspace"){
         if(prev) prev.focus();
@@ -218,13 +217,55 @@ function submit(){
 
 function nextQuestion(){
     stopT = false;
+    const input = game.querySelector("[data-input]");
+    const anwer = q[index].price;
+    cereLitera.classList.remove("hide");
+    stopTime.classList.remove("hide")
+    stopGameTime = false
+    total = total + anwer;
+    counterStopTime = 30;
+ 
+    while(input.firstChild){
+     input.removeChild(input.firstChild)
+    }
+ 
+    const timeCounter = game.querySelector("[data-item]").remove();
+ 
+ 
+    totalPrice.innerText = `Total: ${total}`;
+ 
+     index++;
+     stopGameTime = false;
+     total = 0;
+     stopT = false;
+     startGame.classList.add("hide");
+     game.classList.remove("hide");
+     getData()
+     questionFn()
+    
 }
 
 
 
 function winLetter(){
+   const input = game.querySelector("[data-input]");
+   const anwer = q[index].price;
+   cereLitera.classList.remove("hide");
+   stopTime.classList.remove("hide")
+   stopGameTime = false
+   total = total + anwer;
+   counterStopTime = 30;
+
+   while(input.firstChild){
+    input.removeChild(input.firstChild)
+   }
+
+   const timeCounter = game.querySelector("[data-item]").remove();
+
+
+   totalPrice.innerText = `Total: ${total}`;
+
     index++;
-    totalTime = 180;
     stopGameTime = false;
     total = 0;
     stopT = false;
@@ -232,6 +273,4 @@ function winLetter(){
     game.classList.remove("hide");
     getData()
     questionFn()
-
-    console.log("win")
 }
