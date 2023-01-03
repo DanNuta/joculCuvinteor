@@ -114,6 +114,7 @@ function stopTimeFn(){
     p.dataset.item = true;
     timerStopTime.appendChild(p);
     counterTimeStop()
+    
     setInterval(counterTimeStop, 1000);
 
     const inputTime = game.querySelectorAll("[data-id]");
