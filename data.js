@@ -18,8 +18,8 @@ export const q = [
         numarDeLitere: 5
     },
     {
-        question: "Marca de produs a unei firde de renume",
-        answer: "BRAND",
+        question: "Marca de produs a unei firme de renume",
+        answer: "BREND",
         price: 500,
         numarDeLitere: 5
     },

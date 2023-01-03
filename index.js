@@ -18,8 +18,10 @@ let index = 0;
 let word = [];
 let priceLetter;
 let randomLetter = [];
-let total;
+let total = 0;
 let stopT;
+let counterStopTimeBoolean;
+let idTimeout;
 
 startGame.addEventListener("click", startGameFn);
 stopTime.addEventListener("click", stopTimeFn);
@@ -74,12 +76,12 @@ setInterval(getData, 1000);
 
 
 function counterTimeStop(){
+    if(!counterStopTimeBoolean) return
     if(counterStopTime === 0){
        return nextQuestion();
     };
 
     counterStopTime--;
-
     const p = document.querySelector("[data-item]");
     const dataTime = new Date(1000*counterStopTime);
     const seconds = dataTime.getSeconds();
@@ -105,6 +107,7 @@ function getData(){
 
 
 function stopTimeFn(){
+    counterStopTimeBoolean = true
     stopT = true;
     stopTime.classList.add("hide");
     cereLitera.classList.add("hide");
@@ -113,9 +116,11 @@ function stopTimeFn(){
     const p = document.createElement("p");
     p.dataset.item = true;
     timerStopTime.appendChild(p);
-    counterTimeStop()
-    
-    setInterval(counterTimeStop, 1000);
+
+    if(counterStopTimeBoolean){
+        counterTimeStop()
+        idTimeout = setInterval(counterTimeStop, 1000);
+    }
 
     const inputTime = game.querySelectorAll("[data-id]");
     inputTime.forEach(item => {
@@ -128,9 +133,9 @@ function questionFn(){
     const ques = question.querySelector("h1");
     const answer = q[index].answer;
     const inputConatainer = document.createElement("div");
+
     inputConatainer.dataset.input = true;
     priceLetter = q[index].price;
-
     ques.innerText = q[index].question;
     price.innerText = q[index].price;
 
@@ -160,11 +165,9 @@ function enterKey(e){
     const dataset = target.dataset.id;
     const next = target.nextElementSibling;
     const prev = target.previousElementSibling;
-
     const key = ["BACKSPACE", "ARROWLEFT", "ARROWRIGHT"];
 
     if(value.length > 0 || e.key === "ArrowRight"){
-
 
         !key.includes(value) && (word[dataset] = value);
          if(next){
@@ -193,8 +196,6 @@ if(checkArray){
 
 }
 
-
-
 function submit(){
     const dataWord = word.join("");
 
@@ -214,30 +215,24 @@ function submit(){
     }
 }
 
-
-
 function nextQuestion(){
     stopT = false;
-    const input = game.querySelector("[data-input]");
+    stopGameTime = false;
+    counterStopTimeBoolean = false;
+
+    const input = game.querySelector("[data-input]").remove();
     const anwer = q[index].price;
+    const timeSuply = game.querySelector("[data-item]").remove();
+
     cereLitera.classList.remove("hide");
     stopTime.classList.remove("hide")
-    stopGameTime = false
-    total = total + anwer;
+    total = total - anwer;
     counterStopTime = 30;
- 
-    while(input.firstChild){
-     input.removeChild(input.firstChild)
-    }
- 
-    const timeCounter = game.querySelector("[data-item]").remove();
- 
- 
     totalPrice.innerText = `Total: ${total}`;
  
+    clearInterval(idTimeout)
      index++;
      stopGameTime = false;
-     total = 0;
      stopT = false;
      startGame.classList.add("hide");
      game.classList.remove("hide");
@@ -246,32 +241,24 @@ function nextQuestion(){
     
 }
 
-
-
 function winLetter(){
-   const input = game.querySelector("[data-input]");
+   const input = game.querySelector("[data-input]").remove();
    const anwer = q[index].price;
+   const timeSuply = game.querySelector("[data-item]").remove();
+
+   clearInterval(idTimeout)
    cereLitera.classList.remove("hide");
    stopTime.classList.remove("hide")
-   stopGameTime = false
+   stopGameTime = false;
    total = total + anwer;
    counterStopTime = 30;
-
-   while(input.firstChild){
-    input.removeChild(input.firstChild)
-   }
-
-   const timeCounter = game.querySelector("[data-item]").remove();
-
-
+   counterStopTimeBoolean = false;
    totalPrice.innerText = `Total: ${total}`;
-
-    index++;
-    stopGameTime = false;
-    total = 0;
-    stopT = false;
-    startGame.classList.add("hide");
-    game.classList.remove("hide");
-    getData()
-    questionFn()
+   index++;
+   stopGameTime = false;
+   stopT = false;
+   startGame.classList.add("hide");
+   game.classList.remove("hide");
+   getData()
+   questionFn()
 }
